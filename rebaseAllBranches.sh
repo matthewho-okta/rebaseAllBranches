@@ -3,7 +3,7 @@
 #Configurations
 branch_prefix=""
 git_prune_enabled=false
-use_master_instead_of_main=false
+use_master_instead_of_main=true
 
 if [[ -z $branch_prefix ]] 
 then
@@ -42,15 +42,15 @@ fi
 
 printf "=================================================================================\n"
 
-git checkout master
-git pull origin master
+git checkout ${target_branch}
+git pull origin ${target_branch}
 
-branches=$(git branch -l '${branch_prefix}*' | sed 's/\*/ /g')
+branches=$(git branch -l "${branch_prefix}*" | sed 's/\*/ /g')
 for branch in $branches 
 do
 	printf "=================================================================================\n"
 	printf "\tRebasing ${branch}\n"
-	git checkout $branch && git rebase master
+	git checkout $branch && git rebase ${target_branch}
 	conflicts=$(git ls-files -u)
 	if [[ ! -z $conflicts  ]] 
 	then
