@@ -1,5 +1,5 @@
 # rebaseAllBranches
-Script to rebase all branches with a certain prefix to the current origin master / main. The script will stash any uncommitted changes (Including untracked changes) and swap back to the same branch assuming there are no conflicts during rebasing.
+Script to rebase all branches with a certain prefix to the current origin master / main. The script will stash any uncommitted changes (Including untracked changes)  and swap back to the same branch if there are no conflicts during rebasing.
 
 If there are conflicts during the rebase, you need to fix the conflict and manually pop the stash on your original branch.
 
