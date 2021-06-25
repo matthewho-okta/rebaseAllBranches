@@ -1,5 +1,5 @@
 # rebaseAllBranches
-Script to rebase all branches with a certain prefix to the current master
+Script to rebase all branches with a certain prefix to the current origin master
 
 ## Usage
 - Edit the rebaseAllBranches.sh branch_prefix variable with the prefix you use for your branches
