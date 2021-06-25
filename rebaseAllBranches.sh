@@ -3,6 +3,7 @@
 #Configurations
 branch_prefix=""
 git_prune_enabled=false
+use_master_instead_of_main=false
 
 if [[ -z $branch_prefix ]] 
 then
@@ -11,9 +12,15 @@ then
 fi
 
 # Start of script
+target_branch="main"
+if [ $use_master_instead_of_main = true ] 
+then
+	target_branch="master"
+fi
+
 prev_branch=$(git branch --show-current)
 printf "=================================================================================\n"
-printf "\tRebasing all branches with the following prefix ${branch_prefix}\n"
+printf "\tRebasing all branches with the following prefix ${branch_prefix} onto branch ${target_branch}\n"
 printf "=================================================================================\n"
 conflicts=$(git ls-files -u)
 if [[ ! -z $conflicts  ]] 
