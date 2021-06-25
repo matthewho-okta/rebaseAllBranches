@@ -3,7 +3,7 @@
 #Configurations
 branch_prefix=""
 git_prune_enabled=false
-use_master_instead_of_main=false
+use_master_instead_of_main=true
 
 if [[ -z $branch_prefix ]] 
 then
