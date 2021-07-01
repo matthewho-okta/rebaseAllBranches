@@ -1,9 +1,11 @@
 #!/bin/bash
+set -e
 
 #Configurations
 branch_prefix=""
-git_prune_enabled=false
-use_master_instead_of_main=true
+git_prune_enabled=true
+use_master_instead_of_main=false
+auto_determine_main_or_master=true
 
 if [[ -z $branch_prefix ]] 
 then
@@ -12,15 +14,31 @@ then
 fi
 
 # Start of script
+
+contains_master=false
+if [ $auto_determine_main_or_master = true ]
+then
+	branches=$(git branch -l | sed 's/\*/ /g')
+	for branch in $branches
+	do
+		if [ "$branch" == "master" ]
+		then
+			contains_master=true
+		fi
+	done
+fi
+
 target_branch="main"
-if [ $use_master_instead_of_main = true ] 
+if [ $use_master_instead_of_main = true ] || [ $contains_master = true ]
 then
 	target_branch="master"
 fi
 
 prev_branch=$(git branch --show-current)
+cur_date=$(date)
 printf "=================================================================================\n"
 printf "\tRebasing all branches with the following prefix ${branch_prefix} onto branch ${target_branch}\n"
+printf "\t\t${cur_date}\n"
 printf "=================================================================================\n"
 conflicts=$(git ls-files -u)
 if [[ ! -z $conflicts  ]] 
@@ -77,6 +95,7 @@ fi
 if [ $git_prune_enabled = true ] 
 then
 	printf "=================================================================================\n"
-	printf "\tAutomatic `git prune`\n"
+	printf "\tAutomatic 'git prune' enabled. \n"
 	git prune
+	printf "=================================================================================\n"
 fi
