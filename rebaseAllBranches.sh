@@ -2,7 +2,7 @@
 set -e
 
 #Configurations
-branch_prefix=""
+branch_prefix="mh"
 git_prune_enabled=true
 use_master_instead_of_main=false
 auto_determine_main_or_master=true
@@ -43,7 +43,7 @@ printf "========================================================================
 conflicts=$(git ls-files -u)
 if [[ ! -z $conflicts  ]] 
 then
-	printf "There are existing conflicting files on this branch. Pleas fix this and then retry: Branch=${branch} Files=${conflicts}\n"
+	printf "There are existing conflicting files on this branch. Please fix this and then retry: Branch=${prev_branch} Files=${conflicts}\n"
 	exit 1
 fi
 
@@ -51,11 +51,12 @@ fi
 stashed=false
 if [[ $(git status -s) ]] 
 then
-	printf "\n\tUncommitted changes found. Stashing changes\n"
-	git stash -u
+	stash_name="${prev_branch}: ${cur_date}"
+	printf "\tUncommitted changes found. Stashing changes with message '${stash_name}'\n"
+	git stash push --include-untracked -m ""
 	stashed=true
 else
-	printf "\n\tNo uncommitted changes found. No stash will be created\n"
+	printf "\tNo uncommitted changes found. No stash will be created\n"
 fi
 
 printf "=================================================================================\n"
@@ -96,6 +97,8 @@ if [ $git_prune_enabled = true ]
 then
 	printf "=================================================================================\n"
 	printf "\tAutomatic 'git prune' enabled. \n"
+	printf "\tPruning...\n"
 	git prune
+	printf "\tPruning Complete\n"
 	printf "=================================================================================\n"
 fi
