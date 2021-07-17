@@ -1,11 +1,12 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
 set -e
 
 #Configurations
 branch_prefix="mh"
-git_prune_enabled=true
-use_master_instead_of_main=false
+auto_git_prune_enabled=true
 auto_determine_main_or_master=true
+auto_delete_resolved_branches=true
 
 if [[ -z $branch_prefix ]] 
 then
@@ -13,25 +14,47 @@ then
 	exit 1
 fi
 
+deleteResolvedTickets () {
+	branches=$(git branch -l "${branch_prefix}*" | sed 's/\*/ /g')
+	for branch in $branches
+	do
+		if [[ "${branch^^}" =~  (OKTA-[0-9]+) ]]
+		then
+			okta_ticket="${BASH_REMATCH[1]}"
+			commits_with_ticket=$(git log -500 --grep="\b${okta_ticket}\b")
+			if [[ ! -z $commits_with_ticket ]]
+			then
+				printf "\tDeleting ${branch}\n"
+				git branch -D "${branch}"
+			fi
+		fi
+	done
+}
+
 # Start of script
 
 contains_master=false
-if [ $auto_determine_main_or_master = true ]
-then
-	branches=$(git branch -l | sed 's/\*/ /g')
-	for branch in $branches
-	do
-		if [ "$branch" == "master" ]
-		then
-			contains_master=true
-		fi
-	done
-fi
+branches=$(git branch -l | sed 's/\*/ /g')
+for branch in $branches
+do
+	if [ "$branch" == "master" ]
+	then
+		contains_master=true
+	fi
+done
 
 target_branch="main"
-if [ $use_master_instead_of_main = true ] || [ $contains_master = true ]
+if [ $contains_master = true ]
 then
 	target_branch="master"
+fi
+
+if [ $auto_delete_resolved_branches = true ]
+then
+	printf "=================================================================================\n"
+	printf "\tDeleting branches where tickets have been resolved\n"
+	deleteResolvedTickets
+	printf "\tFINISHED: Deleting branches where tickets have been resolved\n"
 fi
 
 prev_branch=$(git branch --show-current)
@@ -60,9 +83,11 @@ else
 fi
 
 printf "=================================================================================\n"
+printf "\tUpdating ${target_branch} branch with origin\n"
 
 git checkout ${target_branch}
-git pull origin ${target_branch}
+git fetch origin
+git merge --ff-only
 
 branches=$(git branch -l "${branch_prefix}*" | sed 's/\*/ /g')
 for branch in $branches 
@@ -93,7 +118,7 @@ else
 	printf "No previous stash found.\n"
 fi
 
-if [ $git_prune_enabled = true ] 
+if [ $auto_git_prune_enabled = true ] 
 then
 	printf "=================================================================================\n"
 	printf "\tAutomatic 'git prune' enabled. \n"
