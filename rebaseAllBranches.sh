@@ -21,7 +21,7 @@ deleteResolvedTickets () {
 		if [[ "${branch^^}" =~  (OKTA-[0-9]+) ]]
 		then
 			okta_ticket="${BASH_REMATCH[1]}"
-			commits_with_ticket=$(git log -500 --grep="\b${okta_ticket}\b")
+			commits_with_ticket=$(git log -300 --grep="\b${okta_ticket}\b")
 			if [[ ! -z $commits_with_ticket ]]
 			then
 				printf "\tDeleting ${branch}\n"
