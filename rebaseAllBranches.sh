@@ -15,6 +15,7 @@ then
 fi
 
 deleteResolvedTickets () {
+	num_branches_deleted=0
 	branches=$(git branch -l "${branch_prefix}*" | sed 's/\*/ /g')
 	for branch in $branches
 	do
@@ -26,9 +27,12 @@ deleteResolvedTickets () {
 			then
 				printf "\tDeleting ${branch}\n"
 				git branch -D "${branch}"
+				num_branches_deleted=$(($num_branches_deleted+1))
 			fi
 		fi
 	done
+
+	printf "\tFINISHED: Deleted ${num_branches_deleted} branches\n"
 }
 
 # Start of script
@@ -47,14 +51,6 @@ target_branch="main"
 if [ $contains_master = true ]
 then
 	target_branch="master"
-fi
-
-if [ $auto_delete_resolved_branches = true ]
-then
-	printf "=================================================================================\n"
-	printf "\tDeleting branches where tickets have been resolved\n"
-	deleteResolvedTickets
-	printf "\tFINISHED: Deleting branches where tickets have been resolved\n"
 fi
 
 prev_branch=$(git branch --show-current)
@@ -76,7 +72,7 @@ if [[ $(git status -s) ]]
 then
 	stash_name="${prev_branch}: ${cur_date}"
 	printf "\tUncommitted changes found. Stashing changes with message '${stash_name}'\n"
-	git stash push --include-untracked -m ""
+	git stash push --include-untracked -m "${stash_name}"
 	stashed=true
 else
 	printf "\tNo uncommitted changes found. No stash will be created\n"
@@ -88,6 +84,13 @@ printf "\tUpdating ${target_branch} branch with origin\n"
 git checkout ${target_branch}
 git fetch origin
 git merge --ff-only
+
+if [ $auto_delete_resolved_branches = true ]
+then
+	printf "=================================================================================\n"
+	printf "\tDeleting branches for tickets that have been resolved\n"
+	deleteResolvedTickets
+fi
 
 branches=$(git branch -l "${branch_prefix}*" | sed 's/\*/ /g')
 for branch in $branches 
@@ -124,6 +127,7 @@ then
 	printf "\tAutomatic 'git prune' enabled. \n"
 	printf "\tPruning...\n"
 	git prune
+	rm .git/gc.log 
 	printf "\tPruning Complete\n"
 	printf "=================================================================================\n"
 fi
