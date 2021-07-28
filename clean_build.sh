@@ -14,6 +14,8 @@ source $HOME/.zshenv && source $HOME/.zshrc
 cd $HOME/okta/okta-core
 ok vpn start
 ant smoke.tomcat
+stopData
+startData
 ok mono build -m
 ant smoke.tomcat
 
