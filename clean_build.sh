@@ -3,8 +3,9 @@
 set -Eeuo pipefail
 
 errorhandler() {
-	osascript -e 'tell app "System Events" to display dialog "Clean build failed. Check build.log for more information."'
 	ant smoke.tomcat
+	osascript -e 'tell app "System Events" to display dialog "Clean build failed. Check build.log for more information."' &
+	exit 1
 }
 
 trap errorhandler ERR
@@ -14,8 +15,8 @@ source $HOME/.zshenv && source $HOME/.zshrc
 cd $HOME/okta/okta-core
 ok vpn start
 ant smoke.tomcat
-stopData
-startData
+ok mono infra stop # stopData
+ok mono infra create && ok mono infra start # startData
 ok mono build -m
 ant smoke.tomcat
 
