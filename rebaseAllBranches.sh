@@ -108,18 +108,32 @@ do
 	printf "\tFINISHED: Rebasing ${branch}\n"
 done
 
-printf "=================================================================================\n"
-printf "\tSwitching back to ${prev_branch}\n"
-git checkout $prev_branch
-printf "=================================================================================\n"
+prev_branch_deleted=true
+for branch in $branches 
+do
+	if [[ "$branch"  == "$prev_branch" ]]
+	then
+		prev_branch_deleted=false
+	fi
+done
 
-if [ $stashed = true ] 
+printf "=================================================================================\n"
+if [ $prev_branch_deleted = true ] 
 then
-	printf "Found a previous stash. Popping stash off the stack.\n"
-	git stash pop
+	printf "\t${prev_branch} branch has been deleted. Switching to ${target_branch}\n"
+	git checkout $target_branch
 else
-	printf "No previous stash found.\n"
+	printf "\tSwitching back to ${prev_branch}\n"
+	git checkout $prev_branch
+	if [ $stashed = true ] 
+	then
+		printf "Found a previous stash. Popping stash off the stack.\n"
+		git stash pop
+	else
+		printf "No previous stash found.\n"
+	fi
 fi
+printf "=================================================================================\n"
 
 if [ $auto_git_prune_enabled = true ] 
 then
@@ -127,7 +141,7 @@ then
 	printf "\tAutomatic 'git prune' enabled. \n"
 	printf "\tPruning...\n"
 	git prune
-	rm .git/gc.log 
+	rm -f .git/gc.log 
 	printf "\tPruning Complete\n"
 	printf "=================================================================================\n"
 fi
