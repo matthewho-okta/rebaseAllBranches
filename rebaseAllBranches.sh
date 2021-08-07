@@ -140,8 +140,8 @@ then
 	printf "=================================================================================\n"
 	printf "\tAutomatic 'git prune' enabled. \n"
 	printf "\tPruning...\n"
-	git prune
 	rm -f .git/gc.log 
+	git prune
 	printf "\tPruning Complete\n"
 	printf "=================================================================================\n"
 fi
