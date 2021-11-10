@@ -109,7 +109,8 @@ do
 done
 
 prev_branch_deleted=true
-for branch in $branches 
+all_branches=$(git branch | sed 's/\*/ /g')
+for branch in $all_branches 
 do
 	if [[ "$branch"  == "$prev_branch" ]]
 	then
